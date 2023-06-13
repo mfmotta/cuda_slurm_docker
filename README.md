@@ -17,28 +17,19 @@ The setup has three components:
 
 Set up a custom cluster on GCP with [Terraform](https://developer.hashicorp.com/terraform). 
 
-Please refer to [my branch](https://github.com/mfmotta/slurm-gcp) (based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)) for an example.
+Please refer to [my branch](https://github.com/mfmotta/slurm-gcp/tree/mm_branch/terraform/slurm_cluster/examples/slurm_cluster/cloud/full) (based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)) for an example.
 </li>
 
 <li> <b> Docker Image </b>
 <br>
-A Dockerfile to build an image for CUDA development environment for and your OS ditribution (we will use 11.6.0 and Ubuntu 20.04).
+A Dockerfile to build an image for CUDA development environment and the chosen OS ditribution.
 
-We will use this image: `nvidia/cuda:11.6.0-devel-ubuntu20.04`
+We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: `nvidia/cuda:11.6.0-devel-ubuntu20.04`. This requires the following setup [[sources](#sources)]:
 
----
-<font size ="2">
-Requirements:
-<br>
-nvidia images: https://hub.docker.com/r/nvidia/cuda
-
-nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
-
----
 
 <ol type='a'> 
 
-<li> Installation of container runtime for OS distribution --we use Ubuntu 20.04:
+<li> Installation of container runtime for OS distribution:
 
 
 Add the NVIDIA Container Runtime repository and its GPG key to the package manager's configuration on your distribution's system
@@ -70,12 +61,13 @@ sudo apt-get install nvidia-container-runtime
 ```
 </li>
 
+<br>
 <li>
 Docker Engine setup
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file):
 
-See <sup>[1](#myfootnote1)</sup> for pros and cons of this method.
+See [pros and cons](#Docker-Engine-setup-with-Daemon-configuration-file.) of this method.
 
 Create the daemon.json file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
 
@@ -136,7 +128,20 @@ If the Docker daemon restarts without any errors and the `docker info` command s
 
 <br>
 
-<a name="myfootnote1">1</a>: *Docker Engine setup with Daemon configuration file.*
+---
+<br>
+
+#### Sources:
+
+
+nvidia images: https://hub.docker.com/r/nvidia/cuda
+
+nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
+
+---
+<br>
+
+#### Docker Engine setup with Daemon configuration file.
 
 *Pros:*
 
