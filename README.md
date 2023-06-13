@@ -12,13 +12,19 @@ The setup has three components:
 
 ## Step 1
 
-Slurm Cluster set up with [Terraform](https://developer.hashicorp.com/terraform). Checkout [my branch](https://github.com/mfmotta/slurm-gcp) based off of [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)
+Slurm Cluster set up with [Terraform](https://developer.hashicorp.com/terraform). 
+
+Please refer to [my branch](https://github.com/mfmotta/slurm-gcp) based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)
 
 
 ## Step 2
 
 
-A Dockerfile to build an image for CUDA development environment for cuda 11.6.0 and Ubuntu 20.04 OS : `nvidia/cuda:11.6.0-devel-ubuntu20.04`
+A Dockerfile to build an image for CUDA development environment for and your OS ditribution (we will use 11.6.0 and Ubuntu 20.04).
+
+We will use this image: `nvidia/cuda:11.6.0-devel-ubuntu20.04`
+
+**Requirements:**
 
 **nvidia images:** https://hub.docker.com/r/nvidia/cuda
 
@@ -29,7 +35,7 @@ A Dockerfile to build an image for CUDA development environment for cuda 11.6.0 
  add the NVIDIA Container Runtime repository and its GPG key to the package manager's configuration on your distribution's system
  with [the instructions](https://nvidia.github.io/nvidia-container-runtime/):
 
-Debian-based distributions
+For debian-based distributions:
 ```
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | \
   sudo apt-key add -
@@ -41,22 +47,17 @@ sudo apt-get update
 
 [Note](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit:~:text=container%2Dtoolkit.list-,Note,-Note%20that%20in) that the downloaded list file may contain URLs that do not seem to match the expected value of distribution which is expected as packages may be used for all compatible distributions.
 
-2) b) Install the nvidia-container-runtime package:
+2) b) Install the nvidia-container-runtime package with:
 
+```
 sudo apt-get install nvidia-container-runtime
+```
 
 2) c) Docker Engine setup
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file):
 
-Pros and Cons of this method are:
-Pros:
-Allows fine-grained control over the Docker runtime configuration.
-Changes can be made without administrative privileges by modifying the daemon.json file in the user's home directory (~/.docker/daemon.json).
-Does not affect the Docker service globally, only applies to the user's Docker runtime configuration.
-Cons:
-Requires manually restarting the Docker daemon (dockerd) or sending a signal to the daemon (pkill -SIGHUP dockerd) for the changes to take effect.
-Changes are user-specific and only apply to the Docker runtime for that user. 
+See <sup>[1](#myfootnote1)</sup> for pros and cons of this method.
 
 Create the daemon.json file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
 
@@ -105,5 +106,21 @@ If the Docker daemon restarts without any errors and the `docker info` command s
 
 Install singularity
 
+<br>
 
+<br>
 
+<a name="myfootnote1">1</a>: *Docker Engine setup with Daemon configuration file.*
+
+*Pros:*
+
+- Allows fine-grained control over the Docker runtime c onfiguration.
+ 
+- Changes can be made without administrative privileges by modifying the daemon.json file in the user's home directory (~/.docker/daemon.json).
+ 
+- Does not affect the Docker service globally, only applies to the user's Docker runtime configuration.
+
+*Cons:*
+
+- Requires manually restarting the Docker daemon (dockerd) or sending a signal to the daemon (pkill -SIGHUP dockerd) for the changes to take effect.
+- Changes are user-specific and only apply to the Docker runtime for that user.
