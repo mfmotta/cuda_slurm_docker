@@ -8,52 +8,70 @@ The setup has three components:
 
     We will follow the GCP tutorial [Deploying containerized workloads to Slurm on Compute Engine](https://cloud.google.com/architecture/deploying-containerized-workloads-slurm-cluster-compute-engine).
 
+<br>
+<br>
 
+<ol>
+<li> <b> Slurm Cluster </b>
+<br>
 
-## Step 1
+Set up a custom cluster on GCP with [Terraform](https://developer.hashicorp.com/terraform). 
 
-Slurm Cluster set up with [Terraform](https://developer.hashicorp.com/terraform). 
+Please refer to [my branch](https://github.com/mfmotta/slurm-gcp) (based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)) for an example.
+</li>
 
-Please refer to [my branch](https://github.com/mfmotta/slurm-gcp) based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)
-
-
-## Step 2
-
-
+<li> <b> Docker Image </b>
+<br>
 A Dockerfile to build an image for CUDA development environment for and your OS ditribution (we will use 11.6.0 and Ubuntu 20.04).
 
 We will use this image: `nvidia/cuda:11.6.0-devel-ubuntu20.04`
 
-**Requirements:**
+---
+<font size ="2">
+Requirements:
+<br>
+nvidia images: https://hub.docker.com/r/nvidia/cuda
 
-**nvidia images:** https://hub.docker.com/r/nvidia/cuda
+nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
 
-**nvidia container runtime:** https://github.com/NVIDIA/nvidia-container-runtime
+---
 
-2) a) Installation of container runtime for OS distribution --we use Ubuntu 20.04:
+<ol type='a'> 
 
- add the NVIDIA Container Runtime repository and its GPG key to the package manager's configuration on your distribution's system
- with [the instructions](https://nvidia.github.io/nvidia-container-runtime/):
+<li> Installation of container runtime for OS distribution --we use Ubuntu 20.04:
 
-For debian-based distributions:
+
+Add the NVIDIA Container Runtime repository and its GPG key to the package manager's configuration on your distribution's system
+with [the corresponding instructions](https://nvidia.github.io/nvidia-container-runtime/). 
+
+For debian-based distributions, they are:
 ```
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | \
-  sudo apt-key add -
+sudo apt-key add -
 distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/$distribution/nvidia-container-runtime.list | \
-  sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
+sudo tee /etc/apt/sources.list.d/nvidia-container-runtime.list
 sudo apt-get update
 ```
 
-[Note](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit:~:text=container%2Dtoolkit.list-,Note,-Note%20that%20in) that the downloaded list file may contain URLs that do not seem to match the expected value of distribution which is expected as packages may be used for all compatible distributions.
+---
+<font size ="1"> &rarr; [Note](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/install-guide.html#setting-up-nvidia-container-toolkit:~:text=container%2Dtoolkit.list-,Note,-Note%20that%20in): The downloaded list file may contain URLs that do not seem to match the expected value of distribution which is expected as packages may be used for all compatible distributions.</font>
 
-2) b) Install the nvidia-container-runtime package with:
+---
+
+<br>
+</li>
+
+
+<li> Install the nvidia-container-runtime package with:
 
 ```
 sudo apt-get install nvidia-container-runtime
 ```
+</li>
 
-2) c) Docker Engine setup
+<li>
+Docker Engine setup
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file):
 
@@ -81,30 +99,38 @@ You can optionally reconfigure the default runtime by adding the following to /e
 ```
 
 To verify whether the command was executed properly, you can verify if the content of `/etc/docker/daemon.json` 
+</li>
 
-2) d) Restart the Docker daemon to apply the new configuration. You can use the following command:
-   ```
-   sudo systemctl restart docker
-   ```
+<li> Restart the Docker daemon to apply the new configuration. You can use the following command:
+```
+sudo systemctl restart docker
+```
+</li>
 
-2) e) After restarting, verify that the NVIDIA runtime is properly configured by running the following command:
-   ```
-   sudo docker info
-   ```
+<li> After restarting, verify that the NVIDIA runtime is properly configured by running the following command:
+```
+sudo docker info
+```
 
-   The output of sudo docker info should indicate that the NVIDIA runtime is available as one of the configured runtimes. The `Runtimes` section in the output should show something like 
-   ``` 
-   Runtimes: io.containerd.runc.v2 nvidia runc
-   Default Runtime: runc
-    ```
-
+The output of sudo docker info should indicate that the NVIDIA runtime is available as one of the configured runtimes. The `Runtimes` section in the output should show something like 
+``` 
+Runtimes: io.containerd.runc.v2 nvidia runc
+Default Runtime: runc
+```
 
 If the Docker daemon restarts without any errors and the `docker info` command shows the expected configuration, it indicates that the command was executed properly and the NVIDIA runtime is configured correctly.
+</li>
 
+</ol>
 
-## Step 3
+</li>
 
-Install singularity
+<br>
+<li> <b> Singularity </b>
+
+</li>
+
+</ol>
 
 <br>
 
