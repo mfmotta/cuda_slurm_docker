@@ -1,15 +1,15 @@
 # Slurm cluster for parallel computing with CUDA on Google Cloud Platform. 
 
-The setup has three components:
+<br>
+
+The setup involves three components:
 
 1) A custom slurm cluster built using Terraform
 2) An NVIDIA docker image for the OS distribution and the chosen CUDA toolkit.
-3) [Singularity Container Platform](https://sylabs.io/singularity/) for packaging and executing workloads in a container format. 
-
-    We will follow the GCP tutorial [Deploying containerized workloads to Slurm on Compute Engine](https://cloud.google.com/architecture/deploying-containerized-workloads-slurm-cluster-compute-engine).
-
+3) Singularity Container Platform for packaging and executing workloads in a container format. 
 <br>
-<br>
+
+---
 
 <ol>
 <li> <b> Slurm Cluster </b>
@@ -18,14 +18,20 @@ The setup has three components:
 Set up a custom cluster on GCP with [Terraform](https://developer.hashicorp.com/terraform). 
 
 Please refer to [my branch](https://github.com/mfmotta/slurm-gcp/tree/mm_branch/terraform/slurm_cluster/examples/slurm_cluster/cloud/full) (based on [SchedMD/slurm-gcp](https://github.com/SchedMD/slurm-gcp)) for an example.
+    
+The tutorial [Installing apps in a Slurm cluster on Compute Engine](https://cloud.google.com/architecture/installing-apps-slurm-clusters-compute-engine) is also helpful to understand how slurm clusters work on GCP.
 </li>
 
 <li> <b> Docker Image </b>
 <br>
-A Dockerfile to build an image for CUDA development environment and the chosen OS ditribution.
+    
+We need a Dockerfile to build an image for the CUDA development environment and the chosen OS ditribution.
 
-We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: `nvidia/cuda:11.6.0-devel-ubuntu20.04`. This requires the following setup [[sources](#sources)]:
-
+We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: `nvidia/cuda:11.6.0-devel-ubuntu20.04`. However, 
+```
+    docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
+```
+does not work, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag). To downlod the image, we need the following requirements [[sources](#sources)]:
 
 <ol type='a'> 
 
@@ -67,7 +73,7 @@ Docker Engine setup
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file):
 
-See [pros and cons](#Docker-Engine-setup-with-Daemon-configuration-file.) of this method.
+See [pros and cons](#pros-and-cons) of this method.
 
 Create the daemon.json file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
 
@@ -119,6 +125,8 @@ If the Docker daemon restarts without any errors and the `docker info` command s
 
 <br>
 <li> <b> Singularity </b>
+    
+    For this step we recommend the GCP tutorial [Deploying containerized workloads to Slurm on Compute Engine](https://cloud.google.com/architecture/deploying-containerized-workloads-slurm-cluster-compute-engine) and the documentation of the [Singularity Container Platform](https://sylabs.io/singularity/)
 
 </li>
 
@@ -141,7 +149,8 @@ nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
 ---
 <br>
 
-#### Docker Engine setup with Daemon configuration file.
+#### pros-and-cons
+Docker-Engine-setup-with-Daemon-configuration-file.
 
 *Pros:*
 
