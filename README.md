@@ -136,7 +136,8 @@ Now that we have our docker image we can modify it to be used by slurm.
     
 To create a slurm-cluster compliant image, a custom Slurm image can be created. You have to
 
-Requirements: Packer and Ansible are used to orchestrate custom image creation, see (Packer)[https://github.com/SchedMD/slurm-gcp/tree/master/packer] for details. Note: you need a [hashicorp keyring](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli#:~:text=Install%20the%20HashiCorp%20GPG%20key.) --which you should already have after having created the cluster.
+Requirements: Packer and Ansible are used to orchestrate custom image creation, see (Packer)[https://github.com/SchedMD/slurm-gcp/tree/master/packer] for details. 
+<!-- Note: you need a [hashicorp keyring](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli#:~:text=Install%20the%20HashiCorp%20GPG%20key.) --which you should already have after having created the cluster. But the comand to get the keyring is included below -->
 
 Install Packer with:
 
@@ -154,6 +155,11 @@ pip3 install ansible~=2.7
 ```
 </li>
     
+Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image), and modify the pkrvars file and point source_image your image docker image produced in the previous step, and change the source_image_project_id [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
+```
+source_image_project_id = "ubuntu-os-cloud "
+source_image = /var/lib/docker/overlay2
+```
     
 <br>
 <li> <b> Singularity </b>
