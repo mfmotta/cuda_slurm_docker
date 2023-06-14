@@ -2,11 +2,12 @@
 
 <br>
 
-The setup involves three components:
+The setup involves four main parts:
 
 1) A custom slurm cluster built using Terraform
 2) An NVIDIA docker image for the OS distribution and the chosen CUDA toolkit.
-3) Singularity Container Platform for packaging and executing workloads in a container format. 
+3) A [Packer](https://github.com/SchedMD/slurm-gcp/tree/master/packer) to convert the docker image into a slurm-cluster compliant image.
+4) Singularity Container Platform for packaging and executing workloads in a container format. 
 <br>
 
 ---
@@ -31,7 +32,7 @@ We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: `nvidia/cuda:11.6.
 ```
     docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
 ```
-does not work, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag). To downlod the image, we need the following requirements [[sources](#sources)]:
+won't work without a few requirements, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag). and [[sources](#sources)]:
 
 <ol type='a'> 
 
@@ -108,6 +109,7 @@ sudo systemctl restart docker
 sudo docker info
 ```
 
+
 The output of sudo docker info should indicate that the NVIDIA runtime is available as one of the configured runtimes. The `Runtimes` section in the output should show something like 
 ``` 
 Runtimes: io.containerd.runc.v2 nvidia runc
@@ -116,11 +118,47 @@ Default Runtime: runc
 
 If the Docker daemon restarts without any errors and the `docker info` command shows the expected configuration, it indicates that the command was executed properly and the NVIDIA runtime is configured correctly.
 </li>
+    
+<li> Now you can 
+```
+ docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
+```
+
+Now that we have our base image, we can write the Dockerfile for our  
+</li>
 
 </ol>
 
 </li>
 
+<br>
+<li> <b> Custom slurm-cluster compliant image </b>
+    
+    To create a slurm-cluster compliant image, a custom Slurm image can be created. You have to
+    
+    Requirements: Packer and Ansible are used to orchestrate custom image creation, see (Packer)[https://github.com/SchedMD/slurm-gcp/tree/master/packer] for details. Note: you need a [hashicorp keyring](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli#:~:text=Install%20the%20HashiCorp%20GPG%20key.) --which you should already have after having created the cluster.
+   
+    Install Packer with:
+    
+    ```
+    wget -O- https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+    echo "deb [signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" | sudo tee      /etc/apt/sources.list.d/hashicorp.list
+    sudo apt update && sudo apt install packer
+    ```
+    
+    See https://developer.hashicorp.com/packer/downloads for other OS.
+    
+    And run:
+    ``` 
+    pip3 install ansible~=2.7
+    ```
+   
+
+
+
+</li>
+    
+    
 <br>
 <li> <b> Singularity </b>
     
