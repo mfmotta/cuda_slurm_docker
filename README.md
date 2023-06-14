@@ -157,9 +157,49 @@ pip3 install ansible~=2.7
     
 Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image), and modify the pkrvars file and point source_image your image docker image produced in the previous step, and change the source_image_project_id [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
 ```
-source_image_project_id = "ubuntu-os-cloud "
+source_image_project_id = "ubuntu-os-cloud"
 source_image = /var/lib/docker/overlay2
+source_image_family = "ubuntu-2004-lts"
 ```
+    
+also 
+   export GOOGLE_APPLICATION_CREDENTIALS=full path to your credentials file (.json)
+    
+Running on Google Cloud
+If you run the googlecompute Packer builder on GCE or GKE, you can configure that instance or cluster to use a Google Service Account. This will allow Packer to authenticate to Google Cloud without having to bake in a separate credential/authentication file.
+
+It is recommended that you create a custom service account for Packer and assign it Compute Instance Admin (v1) & Service Account User roles.
+
+For gcloud, you can run the following commands:
+
+ gcloud iam service-accounts create packer \
+  --project YOUR_GCP_PROJECT \
+  --description="Packer Service Account" \
+  --display-name="Packer Service Account"
+
+ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
+    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/compute.instanceAdmin.v1
+
+ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
+    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/iam.serviceAccountUser
+
+ gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
+    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+    --role=roles/iap.tunnelResourceAccessor
+
+ gcloud compute instances create INSTANCE-NAME \
+  --project YOUR_GCP_PROJECT \
+  --image-family ubuntu-2004-lts \
+  --image-project ubuntu-os-cloud \
+  --network YOUR_GCP_NETWORK \
+  --zone YOUR_GCP_ZONE \
+  --service-account=packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
+  --scopes="https://www.googleapis.com/auth/cloud-platform"
+
+The service account will be used automatically by Packer as long as there is no account file specified in the Packer configuration file.
+    
     
 <br>
 <li> <b> Singularity </b>
