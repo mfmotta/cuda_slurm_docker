@@ -71,9 +71,7 @@ sudo apt-get install nvidia-container-runtime
 <li>
 Docker Engine setup
 
-We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file):
-
-See [pros and cons](#pros-and-cons) of this method.
+We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file) (see [pros and cons](#pros-and-cons) of this method).
 
 Create the daemon.json file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
 
@@ -141,7 +139,6 @@ If the Docker daemon restarts without any errors and the `docker info` command s
 
 #### Sources:
 
-
 nvidia images: https://hub.docker.com/r/nvidia/cuda
 
 nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
@@ -149,8 +146,8 @@ nvidia container runtime: https://github.com/NVIDIA/nvidia-container-runtime
 ---
 <br>
 
-#### pros-and-cons
-Docker-Engine-setup-with-Daemon-configuration-file.
+#### Pros and cons
+of Docker Engine setup with Daemon configuration file.
 
 *Pros:*
 
