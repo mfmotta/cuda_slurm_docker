@@ -4,7 +4,7 @@
 
 The setup involves four main parts:
 
-1) A custom slurm cluster built using Terraform
+1) A custom slurm cluster built using Terraform.
 2) An NVIDIA docker image for the OS distribution and the chosen CUDA toolkit.
 3) A [Packer](https://github.com/SchedMD/slurm-gcp/tree/master/packer) to convert the docker image into a slurm-cluster compliant image.
 4) Singularity Container Platform for packaging and executing workloads in a container format. 
@@ -28,7 +28,7 @@ The tutorial [Installing apps in a Slurm cluster on Compute Engine](https://clou
     
 We need a Dockerfile to build an image for the CUDA development environment and the chosen OS ditribution.
 
-We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: `nvidia/cuda:11.6.0-devel-ubuntu20.04`. However, 
+We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: ``nvidia/cuda:11.6.0-devel-ubuntu20.04``. However, 
 ```
     docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
 ```
@@ -73,7 +73,7 @@ Docker Engine setup
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file) (see [pros and cons](#pros-and-cons) of this method).
 
-Create the daemon.json file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
+Create the ``daemon.json`` file in your home directory and specify the NVIDIA runtime there. This method allows you to control the NVIDIA runtime only for your user's Docker containers and doesn't require administrative privileges.
 ```
 sudo tee /etc/docker/daemon.json <<EOF
 {
@@ -88,12 +88,12 @@ EOF
 sudo pkill -SIGHUP dockerd
 ```
 
-You can optionally reconfigure the default runtime by adding the following to /etc/docker/daemon.json:
+You can optionally reconfigure the default runtime by adding the following to ``/etc/docker/daemon.json``:
 ```
 "default-runtime": "nvidia"
 ```
 
-To check whether the command was executed properly, you can verify the content of /etc/docker/daemon.json
+To check whether the command was executed properly, you can verify the content of ``/etc/docker/daemon.json``.
 </li>
 
 <li> 
@@ -105,12 +105,12 @@ sudo systemctl restart docker
 </li>
 
 <li> 
-After restarting, verify that the NVIDIA runtime is properly configured by running the following command:
+After restarting, verify that the NVIDIA runtime is properly configured by running:
     
 ```
 sudo docker info
 ```
-The output of sudo docker info should indicate that the NVIDIA runtime is available as one of the configured runtimes. The "Runtimes" section in the output should show something like 
+The output of ``sudo docker info`` should indicate that the NVIDIA runtime is available as one of the configured runtimes. The "Runtimes" section in the output should show something like 
     
 ```
 Runtimes: io.containerd.runc.v2 nvidia runc
@@ -134,9 +134,7 @@ Now that we have our docker image we can modify it to be used by slurm.
 <br>
 <li> <b> Custom slurm-cluster compliant image </b>
     
-To create a slurm-cluster compliant image, a custom Slurm image can be created. You have to
-
-Requirements: Packer and Ansible are used to orchestrate custom image creation, see (Packer)[https://github.com/SchedMD/slurm-gcp/tree/master/packer] for details. 
+To create a slurm-cluster compliant image, you need the following requirements: Packer and Ansible, which are used to orchestrate custom image creation, see [SchedMD/slurm-gcp/packer](https://github.com/SchedMD/slurm-gcp/tree/master/packer) for details. 
 <!-- Note: you need a [hashicorp keyring](https://developer.hashicorp.com/terraform/tutorials/gcp-get-started/install-cli#:~:text=Install%20the%20HashiCorp%20GPG%20key.) --which you should already have after having created the cluster. But the comand to get the keyring is included below -->
 
 Install Packer with:
@@ -148,58 +146,30 @@ sudo apt update && sudo apt install packer
 ```
 See https://developer.hashicorp.com/packer/downloads for other OS.
 
-And run:
+And Ansible with:
 
 ``` 
 pip3 install ansible~=2.7
 ```
 </li>
     
-Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image), and modify the pkrvars file and point source_image your image docker image produced in the previous step, and change the source_image_project_id [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
+Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image) to modify the ``.pkrvars`` file and point ``source_image`` to the docker image produced in the previous step. Change the ``source_image_project_id`` [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
+    
 ```
 source_image_project_id = "ubuntu-os-cloud"
 source_image = /var/lib/docker/overlay2
 source_image_family = "ubuntu-2004-lts"
 ```
+
+Before bulding with packer, make sure you are authenticated with the [gcloud CLI](https://cloud.google.com/sdk/docs/authorizing) and have a credentials file (that will be used by any library that requests [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials)). This can be achieved with
+
+```
+gcloud auth application-default login
+```
+
+your credentials file will be in the ``./config directory``, e.g. ``/.config/gcloud/application_default_credentials.json``.
     
-also 
-   export GOOGLE_APPLICATION_CREDENTIALS=full path to your credentials file (.json)
-    
-Running on Google Cloud
-If you run the googlecompute Packer builder on GCE or GKE, you can configure that instance or cluster to use a Google Service Account. This will allow Packer to authenticate to Google Cloud without having to bake in a separate credential/authentication file.
-
-It is recommended that you create a custom service account for Packer and assign it Compute Instance Admin (v1) & Service Account User roles.
-
-For gcloud, you can run the following commands:
-
- gcloud iam service-accounts create packer \
-  --project YOUR_GCP_PROJECT \
-  --description="Packer Service Account" \
-  --display-name="Packer Service Account"
-
- gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
-    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
-    --role=roles/compute.instanceAdmin.v1
-
- gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
-    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
-    --role=roles/iam.serviceAccountUser
-
- gcloud projects add-iam-policy-binding YOUR_GCP_PROJECT \
-    --member=serviceAccount:packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
-    --role=roles/iap.tunnelResourceAccessor
-
- gcloud compute instances create INSTANCE-NAME \
-  --project YOUR_GCP_PROJECT \
-  --image-family ubuntu-2004-lts \
-  --image-project ubuntu-os-cloud \
-  --network YOUR_GCP_NETWORK \
-  --zone YOUR_GCP_ZONE \
-  --service-account=packer@YOUR_GCP_PROJECT.iam.gserviceaccount.com \
-  --scopes="https://www.googleapis.com/auth/cloud-platform"
-
-The service account will be used automatically by Packer as long as there is no account file specified in the Packer configuration file.
-    
+The building process might take several minutes.
     
 <br>
 <li> <b> Singularity </b>
