@@ -153,7 +153,7 @@ pip3 install ansible~=2.7
 ```
 </li>
     
-Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image) to modify the ``.pkrvars`` file and point ``source_image`` to the docker image produced in the previous step. Change the ``source_image_project_id`` [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
+Now follow the instructions from [/slurm-gcp/docs/images.md](https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image) to modify the ``.pkrvars`` file and point ``source_image`` to the docker image produced in the previous step. <!--Change the ``source_image_project_id`` [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
     
 ```
 source_image_project_id = "ubuntu-os-cloud"
@@ -169,7 +169,7 @@ gcloud auth application-default login
 
 your credentials file will be in the ``./config directory``, e.g. ``/.config/gcloud/application_default_credentials.json``.
     
-The building process might take several minutes.
+The building process might take several minutes.-->
     
 <br>
 <li> <b> Singularity </b>
