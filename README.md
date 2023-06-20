@@ -136,9 +136,6 @@ Now that we have our docker image we can modify it to be used by slurm.
 
 This step requires Packer and Ansible, which are used to orchestrate the custom image creation, see [SchedMD/slurm-gcp/packer](https://github.com/SchedMD/slurm-gcp/tree/master/packer) for details. 
     
-To create a [slurm-cluster compliant image]((https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image)), cd into ``slurm-gcp/packer``and modify the ``example.pkrvars.hcl``, ``variables.pkr.hcl``, and ``main.pkr.hcl``. 
-
-
 Install Packer with:
 
 ```
@@ -155,7 +152,7 @@ pip3 install ansible~=2.7
 ```
 </li>
     
-Our packer configuration files introduce the following main changes:
+To create a [slurm-cluster compliant image]((https://github.com/SchedMD/slurm-gcp/blob/master/docs/images.md#custom-image)), cd into ``slurm-gcp/packer``and modify ``example.pkrvars.hcl``, ``variables.pkr.hcl``, and ``main.pkr.hcl``. Our packer configuration files introduce the following main changes:
 
 In ``example.pkrvars.hcl``:
 
@@ -193,9 +190,17 @@ source "docker" "my_source" {
 
 #build:
 <span style="color: red; font-family: Courier, font-size:6px;">
-- sources = ["sources.googlecompute.image"]</span> <span style="color: green; font-family: Courier font-size:6px;">
+<s>- sources = ["sources.googlecompute.image"] </s> </span>  <span style="color: green; font-family: Courier font-size:6px;">
 + sources = ["sources.docker.my_source"]</span> 
 </code></pre>
+
+Now you can build the custom image with:
+
+```
+packer init 
+packer validate -var-file=example.pkrvars.hcl 
+packer build -var-file=example.pkrvars.hcl 
+```
 
 
 
