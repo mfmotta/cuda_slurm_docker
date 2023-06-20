@@ -1,0 +1,3 @@
+[submodule "slurm-gcp"]
+	path = slurm-gcp
+	url = git@github.com:mfmotta/slurm-gcp.git
