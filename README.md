@@ -4,35 +4,28 @@
 
 The setup involves four main parts:
 
-1) A custom slurm cluster built using Terraform.
-2) An NVIDIA docker image for the OS distribution and the chosen CUDA toolkit.
-3) A [Packer](https://github.com/SchedMD/slurm-gcp/tree/master/packer) to convert the docker image into a slurm-cluster compliant image.
-4) Singularity Container Platform for packaging and executing workloads in a container format. 
+
+1) NVIDIA docker image for the OS distribution and the chosen CUDA toolkit.
+2) Slurm Packer to convert the docker image into a slurm-cluster compliant image.
+3) Custom slurm cluster configuration using Terraform.
+4) Optional : Singularity Container Platform for packaging and executing workloads in a container format. 
+
 <br>
 
 ---
 
 <ol>
-<li> <b> Slurm Cluster </b>
-<br>
-
-Set up a custom cluster on GCP with [Terraform](https://developer.hashicorp.com/terraform). 
-
-Please refer to my guide [Slurm  Cluster on Google Cloud Platform](https://github.com/mfmotta/slurm-gcp#slurm-cluster-on-google-cloud-platform) for an example.
-    
-The tutorial [Installing apps in a Slurm cluster on Compute Engine](https://cloud.google.com/architecture/installing-apps-slurm-clusters-compute-engine) is also helpful to understand how slurm clusters work on GCP.
-</li>
 
 <li> <b> Docker Image </b>
+
 <br>
     
-We need a Dockerfile to build an image for the CUDA development environment and the chosen OS ditribution.
+We want an image for the CUDA development environment in a specific OS ditribution, in this case, CUDA 11.6.0 and Ubuntu 20.04: ``nvidia/cuda:11.6.0-devel-ubuntu20.04``. This image is already available at https://hub.docker.com/r/nvidia/cuda, and [this repository](https://gitlab.com/nvidia/container-images/cuda) can be used to create custom images with different speficicatons. 
 
-We will use an image to install CUDA 11.6.0 and Ubuntu 20.04: ``nvidia/cuda:11.6.0-devel-ubuntu20.04``. However, 
-```
-    docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
-```
-won't work without a few requirements, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag). and [[sources](#sources)]:
+Here we will perform the minimum steps to create our custom image. Notice that, even though ``nvidia/cuda:11.6.0-devel-ubuntu20.04`` is available, ``docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04``
+won't work without the steps below, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag).
+
+Setup:
 
 <ol type='a'> 
 
@@ -42,7 +35,7 @@ won't work without a few requirements, see [hub.docker.com/nvidia/cuda](https://
 Add the NVIDIA Container Runtime repository and its GPG key to the package manager's configuration on your distribution's system
 with [the corresponding instructions](https://nvidia.github.io/nvidia-container-runtime/). 
 
-For debian-based distributions, they are:
+For debian-based distributions:
 ```
 curl -s -L https://nvidia.github.io/nvidia-container-runtime/gpgkey | \
 sudo apt-key add -
@@ -62,14 +55,18 @@ sudo apt-get update
 
 
 <li> Install the nvidia-container-runtime package with:
+
 ```
 sudo apt-get install nvidia-container-runtime
 ```
+
 </li>
 
 <br>
 <li>
-Docker Engine setup
+Docker Engine setup:
+
+<br>
 
 We choose the setup via [Daemon configuration file](https://github.com/NVIDIA/nvidia-container-runtime#daemon-configuration-file) (see [pros and cons](#pros-and-cons) of this method).
 
@@ -97,7 +94,7 @@ To check whether the command was executed properly, you can verify the content o
 </li>
 
 <li> 
-Restart the Docker daemon to apply the new configuration. You can use the following command:
+Restart the Docker daemon to apply the new configuration:
 
 ```
 sudo systemctl restart docker
@@ -105,7 +102,7 @@ sudo systemctl restart docker
 </li>
 
 <li> 
-After restarting, verify that the NVIDIA runtime is properly configured by running:
+After restarting, verify that the NVIDIA runtime is properly configured:
     
 ```
 sudo docker info
@@ -119,12 +116,13 @@ Default Runtime: runc
 If the Docker daemon restarts without any errors and the `docker info` command shows the expected configuration, it indicates that the command was executed properly and the NVIDIA runtime is configured correctly.
 </li>
     
-<li> Now you are able to 
+<li> Now you should be able to 
     
 ```
 docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04
 ```
-Now that we have our docker image we can modify it to be used by slurm.
+
+Now that we have our docker image we need to modify it to be used by slurm.
 </li>
 
 </ol>
@@ -175,12 +173,6 @@ packer {
 
 In ``main.pkr.hcl``:
 
-<style>
-r { color: Red }
-c { color: Cyan }
-</style>
-
-
 <pre><code>#source
 
 source "docker" "my_source" {
@@ -194,6 +186,7 @@ source "docker" "my_source" {
 + sources = ["sources.docker.my_source"]</span> 
 </code></pre>
 
+
 Now you can build the custom image with:
 
 ```
@@ -202,30 +195,18 @@ packer validate -var-file=example.pkrvars.hcl
 packer build -var-file=example.pkrvars.hcl 
 ```
 
+<br>
 
+<li> <b> Slurm Cluster </b>
 
+<br>
 
+Set up a custom cluster on GCP with [Terraform](https://developer.hashicorp.com/terraform). 
 
-
-
-
-<!--Change the ``source_image_project_id`` [to match your OS](https://github.com/SchedMD/slurm-gcp/blob/3c5a3e570137e9ce8f33d19d1dfe46772c5eb66e/docs/images.md#supported-operating-systems),  i.e.
+Please refer to my guide [Slurm  Cluster on Google Cloud Platform](https://github.com/mfmotta/slurm-gcp#slurm-cluster-on-google-cloud-platform) for an example.
     
-```
-source_image_project_id = "ubuntu-os-cloud"
-source_image = /var/lib/docker/overlay2
-source_image_family = "ubuntu-2004-lts"
-```
-
-Before bulding with packer, make sure you are authenticated with the [gcloud CLI](https://cloud.google.com/sdk/docs/authorizing) and have a credentials file (that will be used by any library that requests [Application Default Credentials (ADC)](https://cloud.google.com/docs/authentication/application-default-credentials)). This can be achieved with
-
-```
-gcloud auth application-default login
-```
-
-your credentials file will be in the ``./config directory``, e.g. ``/.config/gcloud/application_default_credentials.json``.
-    
-The building process might take several minutes.-->
+The tutorial [Installing apps in a Slurm cluster on Compute Engine](https://cloud.google.com/architecture/installing-apps-slurm-clusters-compute-engine) is also helpful to understand how slurm clusters work on GCP.
+</li>
     
 <br>
 <li> <b> Singularity </b>
