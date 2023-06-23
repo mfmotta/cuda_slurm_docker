@@ -2,6 +2,10 @@
 
 <br>
 
+The objective of this guide is to set up a Slurm Cluster on GCP with a custom image-- with a specific CUDA toolkit version and OS distribution.
+
+As GCP compute and storage costs can quickly add up, we will minimize the usage of virtual machines and resort to cheaper storage and building costs with the [Artifact Registry API](https://cloud.google.com/artifact-registry) and [Slurm for GCP](https://github.com/SchedMD/slurm-gcp). We will prepare the images locally with all the necessary requirements installed.
+
 The setup involves four main parts:
 
 
@@ -20,7 +24,7 @@ The setup involves four main parts:
 
 <br>
     
-We want an image for the CUDA development environment in a specific OS ditribution, in this case, CUDA 11.6.0 and Ubuntu 20.04: ``nvidia/cuda:11.6.0-devel-ubuntu20.04``. This image is already available at https://hub.docker.com/r/nvidia/cuda, and [this repository](https://gitlab.com/nvidia/container-images/cuda) can be used to create custom images with different speficicatons. 
+We want an image for the CUDA development environment in a specific OS distribution, in this case, CUDA 11.6.0 and Ubuntu 20.04: ``nvidia/cuda:11.6.0-devel-ubuntu20.04``. This image is already available at https://hub.docker.com/r/nvidia/cuda, and [this repository](https://gitlab.com/nvidia/container-images/cuda) can be used to create custom images with different specifications. 
 
 Here we will perform the minimum steps to create our custom image. Notice that, even though ``nvidia/cuda:11.6.0-devel-ubuntu20.04`` is available, ``docker pull nvidia/cuda:11.6.0-devel-ubuntu20.04``
 won't work without the steps below, see [hub.docker.com/nvidia/cuda](https://hub.docker.com/r/nvidia/cuda#:~:text=Deprecated%3A%20%22latest%22%20tag).
